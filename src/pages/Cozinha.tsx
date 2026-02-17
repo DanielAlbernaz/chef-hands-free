@@ -37,10 +37,11 @@ export function Cozinha() {
     anterior: anterior,
   };
 
-  const { isListening, toggleListening, lastCommand, falarTexto } = useVoiceControl({
-    ...comandosBasicos,
-    repetir: () => receita && falarTexto(receita.passos[passoAtual]),
-  });
+  const { isListening, toggleListening, lastCommand, falarTexto, isVoiceSupported } =
+    useVoiceControl({
+      ...comandosBasicos,
+      repetir: () => receita && falarTexto(receita.passos[passoAtual]),
+    });
 
   useEffect(() => {
     if (isListening && receita) {
@@ -114,32 +115,41 @@ export function Cozinha() {
           </div>
         </div>
 
-        <button
-          onClick={toggleListening}
-          className={`
-            shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-full font-semibold transition-all duration-300 border min-h-[44px] touch-manipulation
-            ${
-              isListening
-                ? 'bg-red-500/10 border-red-500/50 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-700 active:bg-slate-600'
-            }
-          `}
-        >
-          {isListening ? (
-            <>
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
-              </span>
-              <span className="text-xs sm:text-sm hidden sm:inline">Ouvindo</span>
-            </>
-          ) : (
-            <>
-              <MicOff className="w-4 h-4 sm:w-4 sm:h-4" />
-              <span className="text-xs sm:text-sm hidden sm:inline">Voz Off</span>
-            </>
-          )}
-        </button>
+        {isVoiceSupported ? (
+          <button
+            onClick={toggleListening}
+            className={`
+              shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-full font-semibold transition-all duration-300 border min-h-[44px] touch-manipulation
+              ${
+                isListening
+                  ? 'bg-red-500/10 border-red-500/50 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                  : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-700 active:bg-slate-600'
+              }
+            `}
+          >
+            {isListening ? (
+              <>
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                </span>
+                <span className="text-xs sm:text-sm hidden sm:inline">Ouvindo</span>
+              </>
+            ) : (
+              <>
+                <MicOff className="w-4 h-4 sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm hidden sm:inline">Voz Off</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <div
+            className="shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-400 text-xs sm:text-sm max-w-[180px] sm:max-w-none"
+            title="No iPhone/iPad o reconhecimento de voz não funciona. Use os botões Próximo e Voltar."
+          >
+            <span className="truncate">Use os botões abaixo</span>
+          </div>
+        )}
       </header>
 
       <main className="flex-1 flex flex-col justify-center items-center px-3 sm:px-6 relative z-10 min-h-0">
@@ -181,18 +191,26 @@ export function Cozinha() {
           </div>
         </div>
 
-        <div
-          className={`mt-4 sm:mt-8 h-6 transition-opacity duration-500 flex-shrink-0 ${
-            lastCommand ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <p className="text-slate-500 text-xs sm:text-sm flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 border border-white/5 max-w-full overflow-hidden">
-            <Mic className="w-3 h-3 text-orange-400 shrink-0" />
-            <span className="truncate">
-              Entendi: <span className="text-slate-300 italic">"{lastCommand}"</span>
-            </span>
+        {isVoiceSupported && (
+          <div
+            className={`mt-4 sm:mt-8 h-6 transition-opacity duration-500 flex-shrink-0 ${
+              lastCommand ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <p className="text-slate-500 text-xs sm:text-sm flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 border border-white/5 max-w-full overflow-hidden">
+              <Mic className="w-3 h-3 text-orange-400 shrink-0" />
+              <span className="truncate">
+                Entendi: <span className="text-slate-300 italic">"{lastCommand}"</span>
+              </span>
+            </p>
+          </div>
+        )}
+
+        {!isVoiceSupported && (
+          <p className="mt-4 sm:mt-6 text-center text-slate-500 text-xs sm:text-sm px-4">
+            No iPhone e iPad o comando por voz não está disponível. Use os botões <strong className="text-slate-400">Voltar</strong> e <strong className="text-slate-400">Próximo</strong> para navegar.
           </p>
-        </div>
+        )}
       </main>
 
       <footer
